@@ -1,0 +1,20 @@
+import BaseRoute from "../../../framework/base.route";
+import { Request, Response, NextFunction } from "express";
+import { {{ pascalCase name }}Controller } from "./{{ pascalCase name }}.controller";
+
+export class  {{ pascalCase name }}Router extends BaseRoute<{{ pascalCase name }}Controller>{
+
+    protected initializeRoutes() {
+        this.router.get('/', (request: Request, response: Response, next: NextFunction) => this.controller.readAll(request, response, next));
+        this.router.get('/:id', (request: Request, response: Response, next: NextFunction) => this.controller.read(request, response, next));
+        this.router.put('/:id', (request: Request, response: Response, next: NextFunction) => this.controller.updateById(request, response, next));
+        this.router.delete('/:id', (request: Request, response: Response, next: NextFunction) => this.controller.deleteById(request, response, next));
+        this.router.post('/', (request: Request, response: Response, next: NextFunction) => this.controller.insert(request, response, next));
+        this.router.post('/search', (request: Request, response: Response, next: NextFunction) => this.controller.search(request, response, next));
+    }
+
+
+    protected getController():  {{ pascalCase name }}Controller {
+        return new  {{ pascalCase name }}Controller();
+    }
+}

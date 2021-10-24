@@ -1,0 +1,11 @@
+import { {{ pascalCase name }}Model } from './{{ pascalCase name }}.model';
+import BaseHandler from "../../../framework/base.handler";
+
+
+export class {{ pascalCase name }}Handler extends BaseHandler<{{ pascalCase name }}Model>{
+    
+    getModel(): {{ pascalCase name }}Model {
+        return new {{ pascalCase name }}Model();
+    }
+
+}

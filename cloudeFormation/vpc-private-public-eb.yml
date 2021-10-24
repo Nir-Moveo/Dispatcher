@@ -1,0 +1,1067 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Cloudformation stack vpc-elastic beanstalk
+Parameters:
+  ProjectName:
+    Type: String
+    Description: "The project name"  
+  BastionKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the bastion host
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  KeyName:
+    Description: >-
+      Name of an existing EC2 KeyPair to enable SSH access to the Elastic
+      Beanstalk hosts
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  SSHLocation:
+    Description: >-
+      Lockdown SSH access to the bastion host (default can be accessed from
+      anywhere)
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid CIDR range of the form x.x.x.x/x.
+  BastionInstanceType:
+    Description: Bastion Host EC2 instance type
+    Type: String
+    Default: t2.small
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m1.small
+      - m1.medium
+      - m1.large
+      - m1.xlarge
+      - m2.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c1.medium
+      - c1.xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - g2.2xlarge
+      - g2.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - d2.xlarge
+      - d2.2xlarge
+      - d2.4xlarge
+      - d2.8xlarge
+      - cr1.8xlarge
+      - cc2.8xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  EBInstanceType:
+    Description: Elastic beanstalk Host EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t1.micro
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m1.small
+      - m1.medium
+      - m1.large
+      - m1.xlarge
+      - m2.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c1.medium
+      - c1.xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - g2.2xlarge
+      - g2.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - d2.xlarge
+      - d2.2xlarge
+      - d2.4xlarge
+      - d2.8xlarge
+      - hi1.4xlarge
+      - hs1.8xlarge
+      - cr1.8xlarge
+      - cc2.8xlarge
+      - cg1.4xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+Mappings:
+  SubnetConfig:
+    VPC:
+      CIDR: 10.0.0.0/16
+    PublicA:
+      CIDR: 10.0.0.0/24
+    PublicB:
+      CIDR: 10.0.1.0/24
+    PublicC:
+      CIDR: 10.0.64.0/24
+    PrivateA:
+      CIDR: 10.0.128.0/24
+    PrivateB:
+      CIDR: 10.0.255.0/24
+  
+  AWSInstanceType2Arch:
+    t1.micro:
+      Arch: HVM64
+    t2.nano:
+      Arch: HVM64
+    t2.micro:
+      Arch: HVM64
+    t2.small:
+      Arch: HVM64
+    t2.medium:
+      Arch: HVM64
+    t2.large:
+      Arch: HVM64
+    m1.small:
+      Arch: HVM64
+    m1.medium:
+      Arch: HVM64
+    m1.large:
+      Arch: HVM64
+    m1.xlarge:
+      Arch: HVM64
+    m2.xlarge:
+      Arch: HVM64
+    m2.2xlarge:
+      Arch: HVM64
+    m2.4xlarge:
+      Arch: HVM64
+    m3.medium:
+      Arch: HVM64
+    m3.large:
+      Arch: HVM64
+    m3.xlarge:
+      Arch: HVM64
+    m3.2xlarge:
+      Arch: HVM64
+    m4.large:
+      Arch: HVM64
+    m4.xlarge:
+      Arch: HVM64
+    m4.2xlarge:
+      Arch: HVM64
+    m4.4xlarge:
+      Arch: HVM64
+    m4.10xlarge:
+      Arch: HVM64
+    c1.medium:
+      Arch: HVM64
+    c1.xlarge:
+      Arch: HVM64
+    c3.large:
+      Arch: HVM64
+    c3.xlarge:
+      Arch: HVM64
+    c3.2xlarge:
+      Arch: HVM64
+    c3.4xlarge:
+      Arch: HVM64
+    c3.8xlarge:
+      Arch: HVM64
+    c4.large:
+      Arch: HVM64
+    c4.xlarge:
+      Arch: HVM64
+    c4.2xlarge:
+      Arch: HVM64
+    c4.4xlarge:
+      Arch: HVM64
+    c4.8xlarge:
+      Arch: HVM64
+    g2.2xlarge:
+      Arch: HVMG2
+    g2.8xlarge:
+      Arch: HVMG2
+    r3.large:
+      Arch: HVM64
+    r3.xlarge:
+      Arch: HVM64
+    r3.2xlarge:
+      Arch: HVM64
+    r3.4xlarge:
+      Arch: HVM64
+    r3.8xlarge:
+      Arch: HVM64
+    i2.xlarge:
+      Arch: HVM64
+    i2.2xlarge:
+      Arch: HVM64
+    i2.4xlarge:
+      Arch: HVM64
+    i2.8xlarge:
+      Arch: HVM64
+    d2.xlarge:
+      Arch: HVM64
+    d2.2xlarge:
+      Arch: HVM64
+    d2.4xlarge:
+      Arch: HVM64
+    d2.8xlarge:
+      Arch: HVM64
+    hi1.4xlarge:
+      Arch: HVM64
+    hs1.8xlarge:
+      Arch: HVM64
+    cr1.8xlarge:
+      Arch: HVM64
+    cc2.8xlarge:
+      Arch: HVM64
+  AWSRegionArch2AMI:
+    af-south-1:
+      HVM64: ami-064cc455f8a1ef504
+      HVMG2: NOT_SUPPORTED
+    ap-east-1:
+      HVM64: ami-f85b1989
+      HVMG2: NOT_SUPPORTED
+    ap-northeast-1:
+      HVM64: ami-0b2c2a754d5b4da22
+      HVMG2: ami-09d0e0e099ecabba2
+    ap-northeast-2:
+      HVM64: ami-0493ab99920f410fc
+      HVMG2: NOT_SUPPORTED
+    ap-northeast-3:
+      HVM64: ami-01344f6f63a4decc1
+      HVMG2: NOT_SUPPORTED
+    ap-south-1:
+      HVM64: ami-03cfb5e1fb4fac428
+      HVMG2: ami-0244c1d42815af84a
+    ap-southeast-1:
+      HVM64: ami-0ba35dc9caf73d1c7
+      HVMG2: ami-0e46ce0d6a87dc979
+    ap-southeast-2:
+      HVM64: ami-0ae99b503e8694028
+      HVMG2: ami-0c0ab057a101d8ff2
+    ca-central-1:
+      HVM64: ami-0803e21a2ec22f953
+      HVMG2: NOT_SUPPORTED
+    cn-north-1:
+      HVM64: ami-07a3f215cc90c889c
+      HVMG2: NOT_SUPPORTED
+    cn-northwest-1:
+      HVM64: ami-0a3b3b10f714a0ff4
+      HVMG2: NOT_SUPPORTED
+    eu-central-1:
+      HVM64: ami-0474863011a7d1541
+      HVMG2: ami-0aa1822e3eb913a11
+    eu-north-1:
+      HVM64: ami-0de4b8910494dba0f
+      HVMG2: ami-32d55b4c
+    eu-south-1:
+      HVM64: ami-08427144fe9ebdef6
+      HVMG2: NOT_SUPPORTED
+    eu-west-1:
+      HVM64: ami-015232c01a82b847b
+      HVMG2: ami-0d5299b1c6112c3c7
+    eu-west-2:
+      HVM64: ami-0765d48d7e15beb93
+      HVMG2: NOT_SUPPORTED
+    eu-west-3:
+      HVM64: ami-0caf07637eda19d9c
+      HVMG2: NOT_SUPPORTED
+    me-south-1:
+      HVM64: ami-0744743d80915b497
+      HVMG2: NOT_SUPPORTED
+    sa-east-1:
+      HVM64: ami-0a52e8a6018e92bb0
+      HVMG2: NOT_SUPPORTED
+    us-east-1:
+      HVM64: ami-032930428bf1abbff
+      HVMG2: ami-0aeb704d503081ea6
+    us-east-2:
+      HVM64: ami-027cab9a7bf0155df
+      HVMG2: NOT_SUPPORTED
+    us-west-1:
+      HVM64: ami-088c153f74339f34c
+      HVMG2: ami-0a7fc72dc0e51aa77
+    us-west-2:
+      HVM64: ami-01fee56b22f308154
+      HVMG2: ami-0fe84a5b4563d8f27
+  Region2Principal:
+    ap-east-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-northeast-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-northeast-2:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-northeast-3:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-south-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-southeast-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ap-southeast-2:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    ca-central-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    cn-north-1:
+      EC2Principal: ec2.amazonaws.com.cn
+      OpsWorksPrincipal: opsworks.amazonaws.com.cn
+    cn-northwest-1:
+      EC2Principal: ec2.amazonaws.com.cn
+      OpsWorksPrincipal: opsworks.amazonaws.com.cn
+    eu-central-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    eu-north-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    eu-west-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    eu-west-2:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    eu-west-3:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    me-south-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    sa-east-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    us-east-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    us-east-2:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    us-west-1:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+    us-west-2:
+      EC2Principal: ec2.amazonaws.com
+      OpsWorksPrincipal: opsworks.amazonaws.com
+
+Resources: 
+  
+  # VPC Virtual private network
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      EnableDnsSupport: true
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - VPC
+        - CIDR
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public-VPC
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+  
+  # Internet Gateway
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Internet-Gateway
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+  
+  # Gateway attachment
+  GatewayToInternet:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  
+  # Public subnet A
+  PublicSubnetA:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - PublicA
+        - CIDR  
+      AvailabilityZone: !Select [ 0, !GetAZs ]    # Get the first AZ in the list       
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public-A
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+  
+  # Public subnet B
+  PublicSubnetB:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - PublicB
+        - CIDR  
+      AvailabilityZone: !Select [ 1, !GetAZs ]    # Get the first AZ in the list       
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public-B
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+
+  
+  # Public subnet C
+  PublicSubnetC:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - PublicC
+        - CIDR  
+      AvailabilityZone: !Select [ 2, !GetAZs ]    # Get the first AZ in the list       
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public-C
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+
+
+  # Public route table
+  PublicRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+
+  PublicRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: GatewayToInternet
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway  
+
+  # Attach the public subnets to public route tables,
+  # and attach the private subnets to private route tables:   
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetCRouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+          SubnetId: !Ref PublicSubnetC
+          RouteTableId: !Ref PublicRouteTable
+
+  PublicNetworkAcl:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Public
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Public
+  
+  InboundHTTPPublicNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNetworkAcl
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 80
+        To: 80
+
+  InboundHTTPSPublicNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNetworkAcl
+      RuleNumber: 101
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 443
+        To: 443
+
+  InboundSSHPublicNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNetworkAcl
+      RuleNumber: 102
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: !Ref SSHLocation
+      PortRange:
+        From: 22
+        To: 22
+
+  InboundEphemeralPublicNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNetworkAcl
+      RuleNumber: 103
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 1024
+        To: 65535
+
+  OutboundPublicNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PublicNetworkAcl
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 0
+        To: 65535
+    
+  PublicSubnetANetworkAclAssociation:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      NetworkAclId: !Ref PublicNetworkAcl
+      
+  PublicSubnetBNetworkAclAssociation:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      NetworkAclId: !Ref PublicNetworkAcl 
+
+  PublicSubnetCNetworkAclAssociation:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      NetworkAclId: !Ref PublicNetworkAcl
+
+      
+
+  # Private subnet A    
+  PrivateSubnetA:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - PrivateA
+        - CIDR
+      AvailabilityZone: !Select [ 0, !GetAZs ]    # Get the first AZ in the list       
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private-A
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Private      
+
+  # Private subnet B   
+  PrivateSubnetB:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !FindInMap 
+        - SubnetConfig
+        - PrivateB
+        - CIDR
+      AvailabilityZone: !Select [ 1, !GetAZs ]    # Get the first AZ in the list       
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private-B
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Private      
+
+  # Private route table        
+  PrivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Private
+
+  PrivateSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetBRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NATGateway
+      
+  PrivateNetworkAcl:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Private
+        - Key: Application
+          Value: !Ref 'AWS::StackId'
+        - Key: Network
+          Value: Private
+  InboundPrivateNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PrivateNetworkAcl
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: false
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 0
+        To: 65535
+  OutBoundPrivateNetworkAclEntry:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref PrivateNetworkAcl
+      RuleNumber: 100
+      Protocol: 6
+      RuleAction: allow
+      Egress: true
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: 0
+        To: 65535
+
+  PrivateSubnetNetworkAclAssociation:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      NetworkAclId: !Ref PrivateNetworkAcl
+
+  # A NAT Gateway:
+  NATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt ElasticIPAddress.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+      - Key: Name
+        Value: !Sub NAT-${AWS::StackName}
+  ElasticIPAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NATSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable internal access to the NAT device
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref BeanstalkSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          SourceSecurityGroupId: !Ref BeanstalkSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  BastionIPAddress:
+    Type: 'AWS::EC2::EIP'
+    DependsOn: GatewayToInternet
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref BastionHost
+  BastionHost:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref BastionInstanceType
+      KeyName: !Ref BastionKeyName
+      SubnetId: !Ref PublicSubnetA
+      ImageId: !FindInMap 
+        - AWSRegionArch2AMI
+        - !Ref 'AWS::Region'
+        - !FindInMap 
+          - AWSInstanceType2Arch
+          - !Ref BastionInstanceType
+          - Arch
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+  BastionSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable access to the Bastion host
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref SSHLocation
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !FindInMap 
+            - SubnetConfig
+            - PrivateA
+            - CIDR
+  BeanstalkSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Allow the Elastic Beanstalk instances to access the NAT device
+      VpcId: !Ref VPC
+  WebServerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - !FindInMap 
+                  - Region2Principal
+                  - !Ref 'AWS::Region'
+                  - EC2Principal
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+  WebServerRolePolicy:
+    Type: 'AWS::IAM::Policy'
+    Properties:
+      PolicyName: WebServerRole
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            NotAction: 'iam:*'
+            Resource: '*'
+      Roles:
+        - !Ref WebServerRole
+  WebServerInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref WebServerRole
+  
+  
+  EBApp:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: !Ref ProjectName
+      Description: !Ref ProjectName
+
+  EBDevAppVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      Description: Version 1.0
+      ApplicationName: !Ref EBApp
+      SourceBundle:
+        S3Bucket: !Join 
+          - '-'
+          - - elasticbeanstalk-samples
+            - !Ref 'AWS::Region'
+        S3Key: nodejs-sample.zip
+
+  EBProdAppVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      Description: Version 1.0
+      ApplicationName: !Ref EBApp
+      SourceBundle:
+        S3Bucket: !Join 
+          - '-'
+          - - elasticbeanstalk-samples
+            - !Ref 'AWS::Region'
+        S3Key: nodejs-sample.zip
+
+  EBEnvDev:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref EBApp
+      EnvironmentName: "Development"
+      Description: AWS Elastic Beanstalk Environment running Nodejs Sample Application
+      SolutionStackName: 64bit Amazon Linux 2 v5.4.3 running Node.js 14
+      VersionLabel: !Ref EBDevAppVersion
+      OptionSettings:
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: SSHSourceRestriction
+          Value: !Join 
+            - ''
+            - - 'tcp,22,22,'
+              - !Ref BastionSecurityGroup
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: SecurityGroups
+          Value: !Ref BeanstalkSecurityGroup
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: EC2KeyName
+          Value: !Ref KeyName
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: InstanceType
+          Value: !Ref EBInstanceType
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: VPCId
+          Value: !Ref VPC
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: Subnets
+          Value: !Join [",", [!Ref PrivateSubnetA, !Ref PrivateSubnetB]]
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: ELBSubnets
+          Value: !Join [",", [!Ref PublicSubnetA, !Ref PublicSubnetB, !Ref PublicSubnetC]]
+        - Namespace: "aws:ec2:vpc"
+          OptionName: AssociatePublicIpAddress
+          Value: 'false'
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: IamInstanceProfile
+          Value: !Ref WebServerInstanceProfile
+        - Namespace: "aws:elasticbeanstalk:cloudwatch:logs"
+          OptionName: StreamLogs
+          Value: 'true'
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: EnvironmentType
+          Value: LoadBalanced
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: LoadBalancerType
+          Value: application
+        - Namespace: "aws:elasticbeanstalk:environment:process:default"
+          OptionName: HealthCheckPath
+          Value: "/api/health"
+        - Namespace: "aws:elbv2:listener:default"
+          OptionName: Protocol
+          Value: "HTTP"
+        - Namespace: "aws:elbv2:listener:default"
+          OptionName: ListenerEnabled
+          Value: "false"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: ListenerEnabled
+        #   Value: "true"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: Protocol
+        #   Value: "HTTPS"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: SSLCertificateArns
+        #   Value: !Ref EBDevACMArn
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: SSLPolicy
+        #   Value: "ELBSecurityPolicy-2016-08"
+
+  
+  EBEnvProd:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      EnvironmentName: "Production"
+      ApplicationName: !Ref EBApp
+      Description: AWS Elastic Beanstalk Environment running Nodejs Sample Application
+      SolutionStackName: 64bit Amazon Linux 2 v5.4.3 running Node.js 14
+      VersionLabel: !Ref EBProdAppVersion
+      OptionSettings:
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: SSHSourceRestriction
+          Value: !Join 
+            - ''
+            - - 'tcp,22,22,'
+              - !Ref BastionSecurityGroup
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: SecurityGroups
+          Value: !Ref BeanstalkSecurityGroup
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: EC2KeyName
+          Value: !Ref KeyName
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: InstanceType
+          Value: !Ref EBInstanceType
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: VPCId
+          Value: !Ref VPC
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: Subnets
+          Value: !Join [",", [!Ref PrivateSubnetA, !Ref PrivateSubnetB]]
+        - Namespace: 'aws:ec2:vpc'
+          OptionName: ELBSubnets
+          Value: !Join [",", [!Ref PublicSubnetA, !Ref PublicSubnetB, !Ref PublicSubnetC]]
+        - Namespace: "aws:ec2:vpc"
+          OptionName: AssociatePublicIpAddress
+          Value: 'false'
+        - Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: IamInstanceProfile
+          Value: !Ref WebServerInstanceProfile
+        - Namespace: "aws:elasticbeanstalk:cloudwatch:logs"
+          OptionName: StreamLogs
+          Value: 'true'
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: EnvironmentType
+          Value: LoadBalanced
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: LoadBalancerType
+          Value: application
+        - Namespace: "aws:elasticbeanstalk:environment:process:default"
+          OptionName: HealthCheckPath
+          Value: "/api/health"
+        - Namespace: "aws:elbv2:listener:default"
+          OptionName: Protocol
+          Value: "HTTP"
+        - Namespace: "aws:elbv2:listener:default"
+          OptionName: ListenerEnabled
+          Value: "false"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: ListenerEnabled
+        #   Value: "true"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: Protocol
+        #   Value: "HTTPS"
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: SSLCertificateArns
+        #   Value: !Ref EBDevACMArn
+        # - Namespace: "aws:elbv2:listener:443"
+        #   OptionName: SSLPolicy
+        #   Value: "ELBSecurityPolicy-2016-08"
+
+Outputs:
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+
+  PublicSubnets:
+    Description: A list of the public subnets
+    Value: !Join [ ",", [ !Ref PublicSubnetA, !Ref PublicSubnetB, !Ref PublicSubnetC ]]
+
+  PrivateSubnets:
+    Description: A list of the private subnets
+    Value: !Join [ ",", [ !Ref PrivateSubnetA, !Ref PrivateSubnetB ]]
+
+  PublicSubnetA:
+    Description: A reference to the public subnet in the 1st Availability Zone
+    Value: !Ref PublicSubnetA
+
+  PublicSubnetB:
+    Description: A reference to the public subnet in the 2nd Availability Zone
+    Value: !Ref PublicSubnetB
+
+
+  PublicSubnetC:
+    Description: A reference to the public subnet in the 3nd Availability Zone
+    Value: !Ref PublicSubnetC
+
+  PrivateSubnetA:
+    Description: A reference to the private subnet in the 1st Availability Zone
+    Value: !Ref PrivateSubnetA
+
+  PrivateSubnetB:
+    Description: A reference to the private subnet in the 2nd Availability Zone
+    Value: !Ref PrivateSubnetB
+
+  Bastion:
+    Description: IP Address of the Bastion host
+    Value: !Ref BastionIPAddress
+
+

@@ -1,0 +1,11 @@
+import { AccessibleRecordModel } from "@casl/mongoose";
+import BaseModel from "../../../framework/base.model"
+import { {{ pascalCase name }}Schema } from "./{{ pascalCase name }}.schema";
+
+
+export class {{ pascalCase name }}Model extends BaseModel {
+
+    getSchema(): AccessibleRecordModel<any, {}> {
+        return {{ pascalCase name }}Schema;
+    }
+}

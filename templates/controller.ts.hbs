@@ -1,0 +1,9 @@
+import BaseController from "../../../framework/base.controller";
+import { {{ pascalCase name }}Handler } from "./{{ pascalCase name }}.handler";
+
+export class {{ pascalCase name }}Controller extends BaseController<{{ pascalCase name }}Handler>{
+
+    getHandler() {
+        return new {{ pascalCase name }}Handler()
+    }
+}

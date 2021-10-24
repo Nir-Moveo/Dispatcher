@@ -1,0 +1,8 @@
+# Ignore artifacts:
+dist
+coverage
+node_modeules
+.history
+cli
+.github
+template

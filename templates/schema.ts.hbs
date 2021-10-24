@@ -1,0 +1,23 @@
+import { cleanObject } from '../../../framework/utils/db/genericFunctions';
+import { createStrongSchema, ISchema, StrongSchema, DocumentStatusEnum } from '../../../framework/utils/db/baseInterface.interface';
+import * as mongoose from 'mongoose';
+import { AccessibleModel } from '@casl/mongoose';
+
+export interface I{{ pascalCase name }} extends ISchema {
+
+};
+
+
+const StrongSchema = createStrongSchema<I{{ pascalCase name }}>(
+    { status: { type: Number, default: DocumentStatusEnum.ACTIVE } },
+    { timestamps: true }
+)
+
+
+StrongSchema.methods.toJSON = function () {
+    return cleanObject(this.toObject());
+}
+
+
+export const  {{ pascalCase name }}Schema = mongoose.model<I{{ pascalCase name }}, AccessibleModel< I{{ pascalCase name }}>>('{{ pascalCase name }}', StrongSchema);
+
