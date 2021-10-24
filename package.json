@@ -30,6 +30,7 @@
         "dot-object": "2.1.4",
         "dotenv": "^10.0.0",
         "express": "4.17.1",
+        "git-flow": "^0.2.0",
         "helmet": "4.6.0",
         "hpp": "0.2.3",
         "jest-junit": "12.3.0",
