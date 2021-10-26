@@ -5,7 +5,7 @@
         "module": "commonjs",
         "allowJs": true,
         "checkJs": true,
-        "outDir": "./dist/src",
+        "outDir": "./dist",
         "sourceMap": true,
         "noImplicitAny": true,
         "experimentalDecorators": true,
