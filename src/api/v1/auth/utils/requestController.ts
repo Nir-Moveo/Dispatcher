@@ -2,7 +2,6 @@ import { IUser } from '../../users/users.schema';
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenException, InvalidTokenException } from '../../../../exceptions';
 import { JWTController } from './jwt.controller';
-import { AppPermissions } from '../../../../framework/permissions/users.ability';
 
 class RequestController {
     /**
@@ -29,7 +28,6 @@ class RequestController {
             try {
                 const decoded = await JWTController.verifyToken(token);
                 res.locals.user = decoded as IUser;
-                AppPermissions.setPermissions(res.locals.user.user);
                 next();
             } catch (error) {
                 next(new InvalidTokenException());

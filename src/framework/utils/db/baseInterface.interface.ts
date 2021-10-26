@@ -26,9 +26,8 @@ export function createStrongSchema<IModel>(schemaBlueprint: SchemaDefinition<Doc
     return schema;
 }
 
-export interface ISchema {
+export interface ISchema extends AccessibleFieldsDocument {
     _id: ObjectId;
-    status?: DocumentStatusEnum;
 }
 
 export enum DocumentStatusEnum {

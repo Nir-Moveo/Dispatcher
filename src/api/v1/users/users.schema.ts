@@ -32,4 +32,4 @@ StrongSchema.methods.toJSON = function () {
     return cleanObject(this.toObject());
 };
 
-export const UsersSchema = mongoose.model<IUser>('Users', StrongSchema);
+export const UsersSchema = mongoose.model<IUser, AccessibleModel<IUser>>('Users', StrongSchema);
