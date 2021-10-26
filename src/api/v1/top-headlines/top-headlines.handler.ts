@@ -1,14 +1,9 @@
 import BaseHandler from '../../../framework/base.handler';
-import NewsAPI from 'ts-newsapi';
-import config from '../../../../config/config';
+import TopHeadlinesModel from './top-headlines.model';
 
-export class topHeadlinesHandler extends BaseHandler<any> {
-  public newsapi= new NewsAPI(config.newsAPI.apiKey);
+export class TopHeadlinesHandler extends BaseHandler<any> {
   getModel(){
-  }
-  async getTopHeadlines(param?: any){ 
-    const res= await this.newsapi.getTopHeadlines(param);
-    return res;
+    return new TopHeadlinesModel
   }
    
 }

@@ -1,15 +1,11 @@
-import { topHeadlinesHandler } from './top-headlines.handler';
+import { TopHeadlinesHandler } from './top-headlines.handler';
 import BaseController from '../../../framework/base.controller';
 import { NextFunction, Response, Request} from 'express';
 
-export class topHeadlinesController extends BaseController<topHeadlinesHandler> {
+export class topHeadlinesController extends BaseController<TopHeadlinesHandler> {
     
-    getHandler(): topHeadlinesHandler {
-        return new topHeadlinesHandler();
+    getHandler(): TopHeadlinesHandler {
+        return new TopHeadlinesHandler();
     }
-    async getTopHeadlines(request: Request, response: Response, next: NextFunction){
-        const data= request.body;
-        const res= await this.handler.getTopHeadlines(data);
-        response.send(res);
-      }
+
 }
