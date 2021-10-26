@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "node",
             "request": "launch",
@@ -13,8 +14,13 @@
                 "run-script",
                 "debug"
             ],
-            "port": 9229
+            "port": 9229,
+            "env":{
+                "MONGODB_URL":"mongodb+srv://Nir:n.a265311@cluster0.uqtel.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+                "NEWS_API_KEY":"fdc0f07711fa494390382316146865e0",               
+            },
         },
+
         {
             "type": "node",
             "request": "launch",
