@@ -5,7 +5,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 export class EverythingRouter extends BaseRoute<EverythingController> {
 
     protected initializeRoutes() {
-        this.router.get('/', (request: Request, response: Response, next: NextFunction) => this.controller.getEveryting(request,response,next));
+      //  this.router.get('/', (request: Request, response: Response, next: NextFunction) => this.controller.getEveryting(request,response,next));
 
     }
 

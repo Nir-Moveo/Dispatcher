@@ -30,11 +30,10 @@ export default abstract class BaseModel {
      * This requires the table to have a column named "id".
      */
     deleteById(_id: string) {
-        return  this.schema.update({ _id }, { $set: { status: DocumentStatusEnum.DELETED } });
+        return this.schema.update({ _id }, { $set: { status: DocumentStatusEnum.DELETED } });
     }
 
     searchBuilder(query: IQueryRequest) {
-        //const abilityMatcher = parseQuery(this.schema.accessibleBy(AppPermissions.getPermissions()).getFilter());
         const props = Object.keys(this.schema.schema.paths);
         //Return search fields in query
         const searchQuery = new QueryBuilder()
@@ -55,7 +54,7 @@ export default abstract class BaseModel {
         const pipeline = [{ ...searchQuery.filter }, { ...searchQuery.search }, { ...searchQuery.sort }]
             //Filter empty query objects
             .filter((item: any) => Object.keys(item).length !== 0);
-        return { searchQuery, pipeline};
+        return { searchQuery, pipeline };
     }
 
     search(query: IQueryRequest) {
@@ -111,7 +110,7 @@ export default abstract class BaseModel {
      */
     insert(data: any) {
         const object = replaceDotWithUnderscore(data);
-        return  this.schema.create(object) ;
+        return this.schema.create(object);
     }
 
     /**
@@ -126,22 +125,21 @@ export default abstract class BaseModel {
      * and their values are the values to insert.
      */
     insertMany(items: any[]): Promise<any> {
-        return this.schema.insertMany(items) ;
+        return this.schema.insertMany(items);
     }
 
     updateById(id: string | ObjectId, rawData: any): any {
         const _id = Types.ObjectId(id as string);
         const item = { ...rawData, _id };
-       // const { can, data } = AppPermissions.canPreform('update', item, this.schemaName);
-        const data = rawData;
-        delete data?._id;
+
+        delete item?._id;
         //change from json to dot data
-        const dotData = dot.dot(data);
-        return  this.schema.findOneAndUpdate({ _id }, dotData, { new: true }) ;
+        const dotData = dot.dot(item);
+        return this.schema.findOneAndUpdate({ _id }, dotData, { new: true });
     }
 
     update(query: any, fieldsToUpdate: any) {
-        return this.schema.update(query, fieldsToUpdate, { new: true });
+        return this.schema.update(query, fieldsToUpdate, { new: true }) ;
     }
 
     updateMany(items: any[]) {

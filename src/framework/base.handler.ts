@@ -62,4 +62,8 @@ export default abstract class BaseHandler<M extends BaseModel> {
     deleteMany(query: any) {
         return this.model.deleteMany(query);
     }
+
+    upsertMany(key: string, obj: any[]){
+        return this.model.upsertMany(key,obj);
+    }
 }

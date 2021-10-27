@@ -8,8 +8,8 @@ export class SourcesController extends BaseController<SourcesHandler> {
         return new SourcesHandler();
     }
     async getSources(request: Request, response: Response, next: NextFunction){
-        const data= request.body;
-        const res= await this.handler.getSources(data);
-        response.send(res);
+     //   const data= request.body;
+     //   const res= await this.handler.getSources(data);
+     //   response.send(res);
       }
 }
