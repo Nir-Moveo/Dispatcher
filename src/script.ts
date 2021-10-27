@@ -27,6 +27,7 @@ class Api {
       sourcesArr.push(source.id)
       DuplicatedLanguages.push(source.language);
     });
+    const sourceDic= _.mapKeys(ApiSources.sources,"id");
     const params :INewsApiEverythingParams ={
       sources:sourcesArr,
       pageSize:100
@@ -34,12 +35,8 @@ class Api {
     
     await Promise.all([   
       newsapi.getEverything(params).then((res)=>{
-        completeEverything= res.articles.map((everything)=>{
-         ApiSources.sources.forEach((source)=>{
-           if(source.id==everything.source.id){
-            this.compare(source,everything)
-           }
-         })
+          completeEverything= res.articles.map((everything)=>{
+            this.compare(sourceDic[`${everything.source.id}`],everything)
          return everything;
        })  
      }).then(()=>{
@@ -49,12 +46,8 @@ class Api {
      }),
      newsapi.getTopHeadlines(params).then((res)=>{
       completeTopHedline= res.articles.map((top)=>{
-       ApiSources.sources.forEach((source)=>{
-         if(source.id==top.source.id){
-          this.compare(source,top);
-         }
-       })
-       return top;
+        this.compare(sourceDic[`${top.source.id}`],top)
+        return top;
      })
    }).then(()=>{
        topHeadlinesHandler.upsertMany("url",completeTopHedline);
