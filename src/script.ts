@@ -3,10 +3,15 @@ import NewsAPI from 'ts-newsapi';
 import { SourcesHandler } from './api/v1/sources/sources.handler';
 import { TopHeadlinesHandler } from './api/v1/top-headlines/top-headlines.handler';
 import * as _ from 'lodash';
-import { ApiNewsLanguage, INewsApiArticle, INewsApiEverythingParams } from 'ts-newsapi/lib/types';
+import { ApiNewsLanguage, INewsApiArticle, INewsApiEverythingParams, INewsApiSourceItem } from 'ts-newsapi/lib/types';
 
 const newsapi= new NewsAPI(process.env.NEWS_API_KEY);
 class Api {
+  public static compare(from:INewsApiSourceItem,to:INewsApiArticle){
+    to.source.language = from.language;
+    to.source.category = from.category;
+    to.source.country = from.country;
+  }
 
   public static async getData(){
     const ApiSources= await newsapi.getSources();
@@ -26,17 +31,13 @@ class Api {
       sources:sourcesArr,
       pageSize:100
     };
-   //const sourcesLanguages= _.uniq(DuplicatedLanguages);
-
     
     await Promise.all([   
       newsapi.getEverything(params).then((res)=>{
         completeEverything= res.articles.map((everything)=>{
          ApiSources.sources.forEach((source)=>{
            if(source.id==everything.source.id){
-             everything.source.language=source.language;
-             everything.source.category=source.category;
-             everything.source.country=source.country;
+            this.compare(source,everything)
            }
          })
          return everything;
@@ -50,9 +51,7 @@ class Api {
       completeTopHedline= res.articles.map((top)=>{
        ApiSources.sources.forEach((source)=>{
          if(source.id==top.source.id){
-           top.source.category=source.category;
-           top.source.country=source.country;
-           top.source.language=source.language;
+          this.compare(source,top);
          }
        })
        return top;
