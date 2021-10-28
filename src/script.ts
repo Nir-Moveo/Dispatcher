@@ -7,25 +7,23 @@ import { ApiNewsLanguage, INewsApiArticle, INewsApiEverythingParams, INewsApiSou
 
 const newsapi= new NewsAPI(process.env.NEWS_API_KEY);
 class Api {
-  public static compare(from:INewsApiSourceItem,to:INewsApiArticle){
+  compare(from:INewsApiSourceItem,to:INewsApiArticle){
     to.source.language = from.language;
     to.source.category = from.category;
     to.source.country = from.country;
   }
 
-  public static async getData(){
+  async getData(){
     const ApiSources= await newsapi.getSources();
     const sourcesHandler = new SourcesHandler;
     const everyThingHandler = new EverythingHandler;
     const topHeadlinesHandler= new TopHeadlinesHandler;
     sourcesHandler.upsertMany("id",ApiSources.sources);
     let sourcesArr:string[] = [];
-    let DuplicatedLanguages:ApiNewsLanguage[]=[];
     let completeEverything:INewsApiArticle[]=[];
     let completeTopHedline:INewsApiArticle[]=[];
     ApiSources.sources.forEach((source)=>{
       sourcesArr.push(source.id)
-      DuplicatedLanguages.push(source.language);
     });
     const sourceDic= _.mapKeys(ApiSources.sources,"id");
     const params :INewsApiEverythingParams ={
