@@ -7,7 +7,7 @@ import { ApiNewsCategory, ApiNewsCountry, ApiNewsLanguage, INewsApiArticle, INew
 
 
 // new interface to add varubals to article schema
-interface newArticleInterface extends INewsApiSource{
+interface INewArticleInterface extends INewsApiSource{
 
   language?:ApiNewsLanguage;
 
@@ -24,7 +24,7 @@ class Api {
    * @param from - original source
    * @param to - new interfacr of source (include: language, category and country)
    */
-  compare(from:INewsApiSourceItem,to:newArticleInterface){
+  compare(from:INewsApiSourceItem,to:INewArticleInterface){
     to.language = from.language;
     to.category = from.category;
     to.country = from.country;
@@ -58,7 +58,7 @@ class Api {
       // get all everything arcticles from Api
       newsapi.getEverything(params).then((res)=>{
           return res.articles.map((res)=>{
-            const everyting :newArticleInterface= res.source
+            const everyting :INewArticleInterface= res.source
             this.compare(sourceDic[`${res.source.id}`],everyting)
          return res;
        })  
@@ -73,7 +73,7 @@ class Api {
       // get all top-headline arcticles from Api
      newsapi.getTopHeadlines(params).then((res)=>{
       return res.articles.map((res)=>{
-        const top:newArticleInterface= res.source
+        const top:INewArticleInterface= res.source
         this.compare(sourceDic[`${res.source.id}`],top)
         return res;
      })

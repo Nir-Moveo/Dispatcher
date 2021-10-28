@@ -1,10 +1,6 @@
-import { AppPermissions } from '../src/framework/permissions/users.ability';
 import * as mongoose from 'mongoose';
-import { Roles } from '../src/api/v1/users/users.schema';
 
-beforeAll(() => {
-    AppPermissions.setPermissions({ _id: '1', role: Roles.Admin });
-});
+
 
 beforeEach(async () => {
     /*
