@@ -77,4 +77,7 @@ export default abstract class BaseHandler<M extends BaseModel> {
     getSources(){
         return this.model.getSources();
     }
+    getDates(){
+        return this.model.getDates();
+    }
 }

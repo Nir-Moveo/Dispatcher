@@ -10,6 +10,10 @@ export class EverythingRouter extends BaseRoute<EverythingController> {
         this.router.post('/getCountries',(request: Request, response: Response, next: NextFunction) => this.controller.getCountries(request,response,next));
         this.router.post('/getLanguages',(request: Request, response: Response, next: NextFunction) => this.controller.getLanguages(request,response,next));
         this.router.post('/getSources',(request: Request, response: Response, next: NextFunction) => this.controller.getSources(request,response,next));
+        this.router.post('/getSourcesStatistics',(request: Request, response: Response, next: NextFunction) => this.controller.getSourceStatistics(request,response,next));
+        this.router.post('/getDatesStatistics',(request: Request, response: Response, next: NextFunction) => this.controller.getDatesStatistics(request,response,next));
+
+        
     }
 
     protected getController(): EverythingController {

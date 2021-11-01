@@ -329,5 +329,14 @@ export default abstract class BaseModel {
         ]
         return this.schema.aggregate(pipeline)
     }
+    getDates(){
+        return this.schema.aggregate([
+            {
+                '$group': {
+                    '_id': '$publishedAt'
+                }
+            }
+        ])
+    }
     
 }

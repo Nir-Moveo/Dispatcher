@@ -3,7 +3,9 @@ import BaseHandler from './base.handler';
 import { ValidationException } from '../exceptions';
 import * as _ from 'lodash';
 import { IQueryRequest } from './db/query-builder';
-
+interface IDate {
+    [key: string]: any
+}
 export default abstract class BaseController<T extends BaseHandler<any>> {
     protected handler: T;
     abstract getHandler(): T;
@@ -119,6 +121,41 @@ export default abstract class BaseController<T extends BaseHandler<any>> {
             const result = await this.handler.getSources();
             return response.json(result);
         } catch (error){
+            next(new ValidationException(error.message));
+        }
+    }
+
+    async getSourceStatistics(request: Request, response: Response, next: NextFunction) {
+        try {
+            const result = await this.handler.getSources();
+            const total= _.sumBy(result,(res)=>{
+                return res.count;
+            })
+            result.map((res)=>{
+                res.percent = (Number(res.count)*100/Number(total)).toFixed(2)
+            })
+            return response.json(result);
+        } catch (error) {
+            next(new ValidationException(error.message));
+        }
+    }
+    async getDatesStatistics(request: Request, response: Response, next: NextFunction) {
+        try {
+            let result:IDate={};
+            const data = await this.handler.getDates();           
+            const dates= data.map((res)=>{
+                res= new Date(res._id)
+                return res;
+            })
+
+            const uniqDates= _.invertBy(dates, (res)=>{
+                return `${res.getFullYear()}/${(res.getMonth()+1)}/${res.getDate()}`
+            })
+            for(const [k,value] of Object.entries(uniqDates)){
+                result[k]=value.length
+            }
+            return response.json(result);
+        } catch (error) {
             next(new ValidationException(error.message));
         }
     }
