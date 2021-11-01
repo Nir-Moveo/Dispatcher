@@ -179,52 +179,47 @@ export default abstract class BaseModel {
 
     }
     getCategories() {
-        return this.schema.aggregate(
-            [
-                {'$project': {'_id': 0,'source.category': 1,'category': '$source.category'}
-                }, { '$project': {'category': 1}
-                }, {'$group': {'_id': '$category','count': {'$sum': 1} }
-                }, {'$project': {'_id': 0,'category': '$_id','count': '$count'}
-                },{'$sort': {'count': -1}}
-        ])
+        const pipeline = [
+            {$project:{_id: 0,'source.category': 1,category: '$source.category'},},
+            {$project:{category: 1},},
+            {$group : {_id: '$category',count: {$sum: 1}},},
+            {$project:{_id: 0,category: '$_id',count: '$count'}},
+            {$sort:{count: -1}}
+        ]
+        return this.schema.aggregate(pipeline);
     }
 
     getCountries(){
-        return this.schema.aggregate(
-            [
-                { '$project': {'_id': 0,'source.country': 1,'country': '$source.country'}
-                }, { '$project': {'country': 1}
-                }, {'$group': {'_id': '$country','count': {'$sum': 1} }
-                }, {'$project': {'_id': 0,'country': '$_id','count': '$count'} 
-                },{'$sort': {'count': -1}}
-        ])
+        const pipeline = [
+            {$project:{_id: 0,'source.country': 1,country: '$source.country'},},
+            {$project:{country: 1},},
+            {$group : {_id: '$country',count: {$sum: 1}},},
+            {$project:{_id: 0,country: '$_id',count: '$count'}},
+            {$sort:{count: -1}}
+        ]
+        return this.schema.aggregate(pipeline)
     }
 
     getLanguages(){
-        return this.schema.aggregate(
-            [
-                { '$project': {'_id': 0,'source.language': 1,'language': '$source.language'}
-                }, { '$project': {'language': 1}
-                }, {'$group': {'_id': '$language','count': {'$sum': 1} }
-                }, {'$project': {'_id': 0,'language': '$_id','count': '$count'} 
-                },{'$sort': {'count': -1}}
-        ])
+        const pipeline = [
+            {$project:{_id: 0,'source.language': 1,language: '$source.language'},},
+            {$project:{language: 1},},
+            {$group : {_id: '$language',count: {$sum: 1}},},
+            {$project:{_id: 0,language: '$_id',count: '$count'}},
+            {$sort:{count: -1}}
+        ]
+        return this.schema.aggregate(pipeline)
     }
 
     getSources(){
-        return this.schema.aggregate(
-            [
-                { '$project': {'_id': 0,'source.name': 1,'name': '$source.name'}
-                }, {'$project': {'name': 1}
-                }, {'$group': {'_id': '$name','count': {'$sum': 1} }
-                }, {'$project': {'_id': 0,'name': '$_id','count': '$count'} 
-                },{'$sort': {'count': -1}}
-        ])
+        const pipeline = [
+            {$project:{_id: 0,'source.name': 1,name: '$source.name'},},
+            {$project:{name: 1},},
+            {$group : {_id: '$name',count: {$sum: 1}},},
+            {$project:{_id: 0,name: '$_id',count: '$count'}},
+            {$sort:{count: -1}}
+        ]
+        return this.schema.aggregate(pipeline)
     }
-
-    getSourcesStatictic(query: IQueryRequest){
-
-    }
-
     
 }
