@@ -7,6 +7,7 @@ import * as dot from 'dot-object';
 import { replaceDotWithUnderscore } from './utils/db/genericFunctions';
 
 export default abstract class BaseModel {
+
     public schemaName: string;
     public schema: AccessibleRecordModel<any>;
 
@@ -43,6 +44,7 @@ export default abstract class BaseModel {
             .limit(query.limit)
             .skip(query.skip)
             .sort(query.sort)
+            .between(query.from,query.to)
             .build();
         return { searchQuery };
     }
@@ -51,7 +53,7 @@ export default abstract class BaseModel {
         //Return search fields in query
         const { searchQuery } = this.searchBuilder(query);
 
-        const pipeline = [{ ...searchQuery.filter }, { ...searchQuery.search }, { ...searchQuery.sort }]
+        const pipeline = [{ ...searchQuery.filter }, { ...searchQuery.search }, { ...searchQuery.sort }, {...searchQuery.between}]
             //Filter empty query objects
             .filter((item: any) => Object.keys(item).length !== 0);
         return { searchQuery, pipeline };
@@ -60,6 +62,7 @@ export default abstract class BaseModel {
     search(query: IQueryRequest) {
         const { searchQuery, pipeline } = this.searchQuery(query);
         return Promise.all([this.schema.aggregate(pipeline).skip(searchQuery.skip).limit(searchQuery.limit), this.totalItemsQuery(pipeline)]).then((res) => {
+
             return {
                 data: res[0],
                 total: res[1] || 0
@@ -77,7 +80,7 @@ export default abstract class BaseModel {
     /**
      * Gets all records from a given table.
      */
-    getAll(skip: number = 0, limit: number = 50, filter: any = {}) {
+    getAll(skip: number = 0, limit: number = 10, filter: any = {}) {
         return this.schema.find(filter).limit(limit).skip(skip);
     }
 
@@ -175,4 +178,53 @@ export default abstract class BaseModel {
         return this.schema.bulkWrite(upserts);
 
     }
+    getCategories() {
+        return this.schema.aggregate(
+            [
+                {'$project': {'_id': 0,'source.category': 1,'category': '$source.category'}
+                }, { '$project': {'category': 1}
+                }, {'$group': {'_id': '$category','count': {'$sum': 1} }
+                }, {'$project': {'_id': 0,'category': '$_id','count': '$count'}
+                },{'$sort': {'count': -1}}
+        ])
+    }
+
+    getCountries(){
+        return this.schema.aggregate(
+            [
+                { '$project': {'_id': 0,'source.country': 1,'country': '$source.country'}
+                }, { '$project': {'country': 1}
+                }, {'$group': {'_id': '$country','count': {'$sum': 1} }
+                }, {'$project': {'_id': 0,'country': '$_id','count': '$count'} 
+                },{'$sort': {'count': -1}}
+        ])
+    }
+
+    getLanguages(){
+        return this.schema.aggregate(
+            [
+                { '$project': {'_id': 0,'source.language': 1,'language': '$source.language'}
+                }, { '$project': {'language': 1}
+                }, {'$group': {'_id': '$language','count': {'$sum': 1} }
+                }, {'$project': {'_id': 0,'language': '$_id','count': '$count'} 
+                },{'$sort': {'count': -1}}
+        ])
+    }
+
+    getSources(){
+        return this.schema.aggregate(
+            [
+                { '$project': {'_id': 0,'source.name': 1,'name': '$source.name'}
+                }, {'$project': {'name': 1}
+                }, {'$group': {'_id': '$name','count': {'$sum': 1} }
+                }, {'$project': {'_id': 0,'name': '$_id','count': '$count'} 
+                },{'$sort': {'count': -1}}
+        ])
+    }
+
+    getSourcesStatictic(query: IQueryRequest){
+
+    }
+
+    
 }
