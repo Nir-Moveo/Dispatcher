@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as mongoose from 'mongoose';
 import { mapObjIndexed } from 'ramda';
 
@@ -11,6 +12,9 @@ export interface IQueryRequest {
     skip: number;
     limit: number;
     sort?: any;
+    from?:any;
+    to?:any;
+    between?:any;
 }
 
 export interface IQuery {
@@ -19,10 +23,13 @@ export interface IQuery {
     sort?: any;
     skip: number;
     limit: number;
+    from?:any;
+    to?:any;
+    between?:any;
 }
 
 export class QueryBuilder {
-    private readonly _query: IQuery = { search: {}, filter: {}, sort: {}, skip: 0, limit: 50 };
+    private readonly _query: IQuery = { search: {}, filter: {}, sort: {}, skip: 0, limit: 10 };
     private _aggregation: boolean = false;
 
     public build(): IQuery {
@@ -37,6 +44,20 @@ export class QueryBuilder {
     skip(skip: number) {
         this._query.skip = Number(skip);
         return this;
+    }
+    from(from:string){
+        this._query.from = new Date(from);
+        return this;
+    }
+    to(to:string){
+        this._query.to = new Date(to);
+        return this;
+    }
+    between(from:any,to:any){
+        if(from && to){
+            this._query.between= this._aggregation ? { $match : { 'publishedAt': {$gte:from, $lte:to}}} : { 'publishedAt': {$gte:from, $lte:to}}
+        }
+            return this;
     }
 
     limit(limit: number) {
@@ -83,6 +104,7 @@ export class QueryBuilder {
         }
         return this;
     }
+
 }
 
 const isObjectId = (v: any) => mongoose.isValidObjectId(v);
