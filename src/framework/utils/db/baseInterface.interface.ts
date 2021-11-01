@@ -23,6 +23,9 @@ export type StrongSchema<M> = { [key in keyof M]: any }; // & {ref: string};
  */
 export function createStrongSchema<IModel>(schemaBlueprint: SchemaDefinition<DocumentDefinition<any>>, options?: SchemaOptions) {
     const schema = new Schema<IModel>(schemaBlueprint, options);
+    schema.plugin(accessibleRecordsPlugin);
+    schema.plugin(accessibleFieldsPlugin);
+    schema.plugin(accessibleRecordsPlugin);
     return schema;
 }
 

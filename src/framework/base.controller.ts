@@ -16,8 +16,9 @@ export default abstract class BaseController<T extends BaseHandler<any>> {
         try {
             const query: IQueryRequest = {
                 skip: 0, //default
-                limit: 50, //default
+                limit: 10, //default
                 filter: {},
+                search:"",
                 ...request.body
             };
             const result = await this.handler.search(query);
@@ -83,6 +84,41 @@ export default abstract class BaseController<T extends BaseHandler<any>> {
             const result = await this.handler.updateById(id, data);
             return pickFields ? response.json(_.pick(result, pickFields)) : response.json(result);
         } catch (error) {
+            next(new ValidationException(error.message));
+        }
+    }
+
+    async getCategories(request: Request, response: Response, next: NextFunction){
+        try{
+            const result = await this.handler.getCategories();
+            return response.json(result);
+        } catch (error){
+            next(new ValidationException(error.message));
+        }
+    }
+
+    async getCountries(request: Request, response: Response, next: NextFunction){
+        try{
+            const result = await this.handler.getCountries();
+            return response.json(result);
+        } catch (error){
+            next(new ValidationException(error.message));
+        }
+    }
+
+    async getLanguages(request: Request, response: Response, next: NextFunction){
+        try{
+            const result = await this.handler.getLanguages();
+            return response.json(result);
+        } catch (error){
+            next(new ValidationException(error.message));
+        }
+    }
+    async getSources(request: Request, response: Response, next: NextFunction){
+        try{
+            const result = await this.handler.getSources();
+            return response.json(result);
+        } catch (error){
             next(new ValidationException(error.message));
         }
     }
