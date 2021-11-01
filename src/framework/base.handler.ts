@@ -1,6 +1,5 @@
 import { DocumentStatusEnum } from './utils/db/baseInterface.interface';
 import BaseModel from './base.model';
-import { IUser } from '../api/v1/users/users.schema';
 import { IQueryRequest } from './db/query-builder';
 
 export default abstract class BaseHandler<M extends BaseModel> {
@@ -65,5 +64,17 @@ export default abstract class BaseHandler<M extends BaseModel> {
 
     upsertMany(key: string, obj: any[]){
         return this.model.upsertMany(key,obj);
+    }
+    getCategories(){
+        return this.model.getCategories();
+    }
+    getCountries(){
+        return this.model.getCountries();
+    }
+    getLanguages(){
+        return this.model.getLanguages();
+    }
+    getSources(){
+        return this.model.getSources();
     }
 }
