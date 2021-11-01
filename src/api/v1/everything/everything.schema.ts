@@ -6,9 +6,11 @@ import { AccessibleModel } from '@casl/mongoose';
 export interface IEverything extends ISchema {
 
     source:{
-    id:string,
-    name:string,
-    language:string
+      id:string,
+      name:string,
+      language:string,
+      category:string,
+      country:string
     },
     author:string,
     title:string,
@@ -24,7 +26,9 @@ const StrongSchema = createStrongSchema<IEverything>(
           source:{type:{
             id:{type:String},
             name:{type:String},
-            language:{type:String}
+            language:{type:String},
+            category:{type:String},
+            country:{type:String}
           },
         },
           author:{type:String},
