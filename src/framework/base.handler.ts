@@ -65,19 +65,14 @@ export default abstract class BaseHandler<M extends BaseModel> {
     upsertMany(key: string, obj: any[]){
         return this.model.upsertMany(key,obj);
     }
-    getCategories(){
-        return this.model.getCategories();
-    }
-    getCountries(){
-        return this.model.getCountries();
-    }
-    getLanguages(){
-        return this.model.getLanguages();
-    }
-    getSources(){
-        return this.model.getSources();
+    getDropdown(key:string){
+        return this.model.getDropdown(key)
     }
     getDates(){
         return this.model.getDates();
     }
+    getSourceStatistics(){
+        return this.model.getSourceStatistics();
+    }
+
 }

@@ -3,9 +3,7 @@ import BaseHandler from './base.handler';
 import { ValidationException } from '../exceptions';
 import * as _ from 'lodash';
 import { IQueryRequest } from './db/query-builder';
-interface IDate {
-    [key: string]: any
-}
+
 export default abstract class BaseController<T extends BaseHandler<any>> {
     protected handler: T;
     abstract getHandler(): T;
@@ -89,74 +87,39 @@ export default abstract class BaseController<T extends BaseHandler<any>> {
             next(new ValidationException(error.message));
         }
     }
-
-    async getCategories(request: Request, response: Response, next: NextFunction){
-        try{
-            const result = await this.handler.getCategories();
-            return response.json(result);
-        } catch (error){
-            next(new ValidationException(error.message));
+    /**
+     * generic function to get all dropdowns by key
+     */
+         async getDropdown(request: Request, response: Response, next: NextFunction,key:string){
+            try{
+                const result = await this.handler.getDropdown(key);
+                return response.json(result);
+            } catch (error){
+                next(new ValidationException(error.message));
+            }
         }
-    }
-
-    async getCountries(request: Request, response: Response, next: NextFunction){
-        try{
-            const result = await this.handler.getCountries();
-            return response.json(result);
-        } catch (error){
-            next(new ValidationException(error.message));
-        }
-    }
-
-    async getLanguages(request: Request, response: Response, next: NextFunction){
-        try{
-            const result = await this.handler.getLanguages();
-            return response.json(result);
-        } catch (error){
-            next(new ValidationException(error.message));
-        }
-    }
-    async getSources(request: Request, response: Response, next: NextFunction){
-        try{
-            const result = await this.handler.getSources();
-            return response.json(result);
-        } catch (error){
-            next(new ValidationException(error.message));
-        }
-    }
-
+        
+    /**
+     * function to get the statistics of sources
+     */
     async getSourceStatistics(request: Request, response: Response, next: NextFunction) {
         try {
-            const result = await this.handler.getSources();
-            const total= _.sumBy(result,(res)=>{
-                return res.count;
-            })
-            result.map((res)=>{
-                res.percent = (Number(res.count)*100/Number(total)).toFixed(2)
-            })
+            const result = await this.handler.getSourceStatistics();
             return response.json(result);
         } catch (error) {
             next(new ValidationException(error.message));
         }
     }
+    /**
+     * function to get the statistics of all articles by published date
+     */
     async getDatesStatistics(request: Request, response: Response, next: NextFunction) {
         try {
-            let result:IDate={};
-            const data = await this.handler.getDates();           
-            const dates= data.map((res)=>{
-                res= new Date(res._id)
-                return res;
-            })
-
-            const uniqDates= _.invertBy(dates, (res)=>{
-                return `${res.getFullYear()}/${(res.getMonth()+1)}/${res.getDate()}`
-            })
-            for(const [k,value] of Object.entries(uniqDates)){
-                result[k]=value.length
-            }
+            const result = await this.handler.getDates();   
             return response.json(result);
         } catch (error) {
             next(new ValidationException(error.message));
         }
     }
+
 }
