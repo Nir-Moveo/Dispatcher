@@ -60,6 +60,8 @@ class Api {
           return res.articles.map((res)=>{
             const everyting :INewArticle= res.source
             this.compare(sourceDic[`${res.source.id}`],everyting)
+            const date= new Date(res.publishedAt)
+            res.publishedAt= `${date.getFullYear()}/${(date.getMonth()+1)}/${date.getDate()}`
          return res;
        })  
      }).then((result)=>{
@@ -75,6 +77,9 @@ class Api {
       return res.articles.map((res)=>{
         const top:INewArticle= res.source
         this.compare(sourceDic[`${res.source.id}`],top)
+        const date= new Date(res.publishedAt)
+        res.publishedAt= `${date.getFullYear()}/${(date.getMonth()+1)}/${date.getDate()}`
+
         return res;
      })
    }).then((result)=>{
