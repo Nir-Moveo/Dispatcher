@@ -4,7 +4,6 @@ import { Types } from 'mongoose';
 import * as _ from 'lodash';
 import SourceModel from './sources.model';
 import { IQueryRequest } from '../../../framework/db/query-builder';
-import { SourceSchema } from './sources.schema';
 
 const AppTest = new App(3000).app;
 const sourceModel = new SourceModel();

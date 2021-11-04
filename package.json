@@ -7,8 +7,8 @@
         "generate": "plop",
         "test": "jest --verbose --coverage",
         "build": "tsc",
-        "debug": "nodemon --watch ./dist/src --inspect=0.0.0.0:9224 --nolazy ./dist/server.js",
-        "start": "nodemon ./dist/server.js",
+        "debug": "nodemon --watch ./dist/src --inspect=0.0.0.0:9224 --nolazy ./dist/src/server.js",
+        "start": "nodemon ./dist/src/server.js",
         "prettier": "prettier --write .",
         "docs": "apidoc -i apidoc -o webApidoc",
         "coverage.submit": "codecov"
@@ -18,8 +18,9 @@
     "dependencies": {
         "@casl/ability": "5.4.3",
         "@casl/mongoose": "5.0.0",
+        "@types/moment": "^2.13.0",
         "@types/sanitizer": "0.0.28",
-        "apidoc": "0.29.0",
+        "apidoc": "^0.29.0",
         "axios": "^0.23.0",
         "bcryptjs": "2.4.3",
         "body-parser": "1.19.0",
@@ -36,7 +37,7 @@
         "jest-junit": "12.3.0",
         "jsonwebtoken": "8.5.1",
         "lodash": "4.17.21",
-        "moment": "2.29.1",
+        "moment": "^2.29.1",
         "mongoose": "5.13.9",
         "morgan": "1.10.0",
         "newsapi": "^2.4.1",
@@ -63,12 +64,13 @@
         ]
     },
     "apidoc": {
-        "name": "heka",
+        "name": "Dispatcher Api documentation",
         "version": "0.1.0",
         "url": "http://localhost:3000",
         "template": {
             "withCompare": true,
-            "withGenerator": true
+            "withGenerator": true,
+            "forceLanguage": "en"
         }
     },
     "devDependencies": {
@@ -104,7 +106,7 @@
         "codecov": "3.8.3",
         "cross-env": "7.0.3",
         "eslint": "7.32.0",
-        "jest": "27.2.4",
+        "jest": "^27.2.4",
         "nodemon": "2.0.13",
         "plop": "2.7.4",
         "supertest": "6.1.6",
