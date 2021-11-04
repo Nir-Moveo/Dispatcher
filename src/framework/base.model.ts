@@ -45,6 +45,7 @@ export default abstract class BaseModel {
             .limit(query.limit)
             .skip(query.skip)
             .sort(query.sort)
+            // .addField()
             .between(query.from,query.to)
             .build();
         return { searchQuery };
@@ -187,20 +188,8 @@ export default abstract class BaseModel {
     getDropdown(key:string){
         const pipeline = [
             {
-                $project:{
-                    _id: 0,
-                    [`source.${key}`]: 1,
-                    [`${key}`]: `$source.${key}`
-                },
-            },
-            {
-                $project:{
-                    [`${key}`]: 1
-                },
-            },
-            {
                 $group : {
-                    _id:`$${key}`,
+                    _id:`$source.${key}`,
                     count: {
                         $sum: 1
                     }
@@ -210,7 +199,7 @@ export default abstract class BaseModel {
                 $project:{
                     _id: 0,
                     [`${key}`]: '$_id',
-                    count: '$count'
+                    count: 1
                 }
             },
             {
@@ -225,21 +214,29 @@ export default abstract class BaseModel {
      * function to get all published dates for all the articles
      */
     getDates(){
-        const pipeline =[
+        const pipeline = [
             {
-                '$project': {
-                    '_id': 0, 
-                    'publishDate': '$publishedAt'
-                }
-            }, {
-                '$group': {
-                    '_id': '$publishDate', 
-                    'count': {
+                $group: {
+                    _id: {
+                        year: {
+                            '$year': '$publishedAt'
+                        }, 
+                        week: {
+                            '$week': '$publishedAt'
+                        }
+                    }, 
+                    count: {
                         '$sum': 1
                     }
                 }
+            },
+            {
+                $sort:{
+                    year:1,
+                    week:1
+                }
             }
-        ]
+        ];
         return this.schema.aggregate(pipeline)
     }
 
