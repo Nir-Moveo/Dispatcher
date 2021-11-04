@@ -1,9 +1,9 @@
 import BaseHandler from '../../../framework/base.handler';
-import TopHeadlinesModel from './top-headlines.model';
+import topHeadlinesModel from './top-headlines.model';
 
-export class TopHeadlinesHandler extends BaseHandler<any> {
+export class topHeadlinesHandler extends BaseHandler<any> {
   getModel(){
-    return new TopHeadlinesModel
+    return new topHeadlinesModel
   }
    
 }

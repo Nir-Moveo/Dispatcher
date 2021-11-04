@@ -1,6 +1,6 @@
 import { topHeadlinesController } from './top-headlines.controller';
 import BaseRoute from '../../../framework/base.route';
-import { Request, Response, NextFunction, Router } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 export class topHeadlinesRouter extends BaseRoute<topHeadlinesController> {
 
