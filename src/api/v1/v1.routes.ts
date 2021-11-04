@@ -1,7 +1,4 @@
-import { UsersRouter } from './users/users.route';
 import { Router } from 'express';
-import AuthRoute from './auth/auth.route';
-import RequestController from './auth/utils/requestController';
 import { EverythingRouter } from './everything/everything.route';
 import { topHeadlinesRouter } from './top-headlines/top-headlines.route';
 import { SourcesRouter } from './sources/sources.route';
