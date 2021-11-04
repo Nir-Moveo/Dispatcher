@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import moment = require('moment');
 import * as mongoose from 'mongoose';
 import { mapObjIndexed } from 'ramda';
 
@@ -55,7 +56,7 @@ export class QueryBuilder {
     }
     between(from:any,to:any){
         if(from && to){
-            this._query.between= this._aggregation ? { $match : { 'publishedAt': {$gte:from, $lte:to}}} : { 'publishedAt': {$gte:from, $lte:to}}
+            this._query.between= this._aggregation ? { $match : { 'publishedAt': {$gte:new Date(from), $lte:new Date(to)}}} : { 'publishedAt': {$gte:new Date(from), $lte:new Date(to)}}
         }
             return this;
     }

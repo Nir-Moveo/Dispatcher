@@ -1,5 +1,5 @@
 import { cleanObject } from '../../../framework/utils/db/genericFunctions';
-import { createStrongSchema, ISchema, StrongSchema, DocumentStatusEnum } from '../../../framework/utils/db/baseInterface.interface';
+import { createStrongSchema, ISchema, StrongSchema } from '../../../framework/utils/db/baseInterface.interface';
 import * as mongoose from 'mongoose';
 import { AccessibleModel } from '@casl/mongoose';
 
@@ -7,7 +7,10 @@ export interface ITopHeadlines extends ISchema {
 
     source:{
     id:string,
-    name:string
+    name:string,
+    language:string,
+    category:string,
+    country:string
     },
     author:string,
     title:string,
@@ -22,7 +25,10 @@ const StrongSchema = createStrongSchema<ITopHeadlines>(
     {
           source:{type:{
             id:{type:String},
-            name:{type:String}
+            name:{type:String},
+            language:{type:String},
+            category:{type:String},
+            country:{type:String}
           },
         },
           author:{type:String},

@@ -5,6 +5,7 @@ import { ValidationException } from '../exceptions';
 import { IQueryRequest, parseQuery, QueryBuilder } from './db/query-builder';
 import * as dot from 'dot-object';
 import { replaceDotWithUnderscore } from './utils/db/genericFunctions';
+import * as _ from 'lodash';
 
 export default abstract class BaseModel {
 
@@ -44,6 +45,7 @@ export default abstract class BaseModel {
             .limit(query.limit)
             .skip(query.skip)
             .sort(query.sort)
+            // .addField()
             .between(query.from,query.to)
             .build();
         return { searchQuery };
@@ -178,23 +180,16 @@ export default abstract class BaseModel {
         return this.schema.bulkWrite(upserts);
 
     }
-    getCategories() {
+    /**
+     * generic function to get dropdown by key
+     * @param key language / country / category / name - (for source)
+     * @returns all dropdown with count of articals 
+     */
+    getDropdown(key:string){
         const pipeline = [
             {
-                $project:{
-                    _id: 0,
-                    'source.category': 1,
-                    category: '$source.category'
-                },
-            },
-            {
-                $project:{
-                    category: 1
-                },
-            },
-            {
                 $group : {
-                    _id: '$category',
+                    _id:`$source.${key}`,
                     count: {
                         $sum: 1
                     }
@@ -203,46 +198,8 @@ export default abstract class BaseModel {
             {
                 $project:{
                     _id: 0,
-                    category: '$_id',
-                    count: '$count'
-                }
-            },
-            {
-                $sort:{
-                    count: -1
-                }
-            }
-        ]
-        return this.schema.aggregate(pipeline);
-    }
-
-    getCountries(){
-        const pipeline = [
-            {
-                $project:{
-                    _id: 0,
-                    'source.country': 1,
-                    country: '$source.country'
-                },
-            },
-            {
-                $project:{
-                    country: 1
-                },
-            },
-            {
-                $group : {
-                    _id: '$country',
-                    count: {
-                        $sum: 1
-                    }
-                },
-            },
-            {
-                $project:{
-                    _id: 0,
-                    country: '$_id',
-                    count: '$count'
+                    [`${key}`]: '$_id',
+                    count: 1
                 }
             },
             {
@@ -253,81 +210,46 @@ export default abstract class BaseModel {
         ]
         return this.schema.aggregate(pipeline)
     }
-
-    getLanguages(){
+    /**
+     * function to get all published dates for all the articles
+     */
+    getDates(){
         const pipeline = [
             {
-                $project:{
-                    _id: 0,
-                    'source.language': 1,
-                    language: '$source.language'
-                },
-            },
-            {
-                $project:{
-                    language: 1
-                },
-            },
-            {
-                $group : {
-                    _id: '$language',
+                $group: {
+                    _id: {
+                        year: {
+                            '$year': '$publishedAt'
+                        }, 
+                        week: {
+                            '$week': '$publishedAt'
+                        }
+                    }, 
                     count: {
-                        $sum: 1
+                        '$sum': 1
                     }
-                },
-            },
-            {
-                $project:{
-                    _id: 0,
-                    language: '$_id',
-                    count: '$count'
                 }
             },
             {
                 $sort:{
-                    count: -1
+                    year:1,
+                    week:1
                 }
             }
-        ]
+        ];
         return this.schema.aggregate(pipeline)
     }
 
-    getSources(){
-        const pipeline = [
-            {
-                $project:{
-                    _id: 0,
-                    'source.name': 1,
-                    name: '$source.name'
-                },
-            },
-            {
-                $project:{
-                    name: 1
-                },
-            },
-            {
-                $group : {
-                    _id: '$name',
-                    count: {
-                        $sum: 1
-                    }
-                },
-            },
-            {
-                $project:{
-                    _id: 0,
-                    name: '$_id',
-                    count: '$count'
-                }
-            },
-            {
-                $sort:{
-                    count: -1
-                }
-            }
-        ]
-        return this.schema.aggregate(pipeline)
+   async  getSourceStatistics(){
+        const result = await this.getDropdown("name");
+        const total= _.sumBy( result,(res)=>{
+            return res.count;
+        })
+        result.map((res)=>{
+            res.percent = (Number(res.count)*100/Number(total)).toFixed(2)
+        })
+        return result;
     }
+    
     
 }
