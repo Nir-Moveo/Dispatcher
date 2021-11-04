@@ -95,19 +95,14 @@ class Api {
 
       // get all everything arcticles from Api
       newsapi.getEverything(params).then((res)=>{
-        const t :INewArticle[] = res.articles.map((article)=>{
+        const allNewArticles :INewArticle[] = res.articles.map((article)=>{
           return {
             ...article,
             publishedAt:moment(article.publishedAt).toDate(),
             source:this.compare(sourceDic[`${article.source.id}`],article.source)
           }
         })
-          // return res.articles.map((res)=>{
-          //   const everyting :INewArticleSource= res.source
-          //   res.publishedAt= new Date(res.publishedAt)
-          //   this.compare(sourceDic[`${res.source.id}`],everyting)
-          //   // res.publishedAt= `${everyting.publishDate.getFullYear()}/${(everyting.publishDate.getMonth()+1)}/${everyting.publishDate.getDate()}`
-         return t;
+         return allNewArticles;
        }).then((result)=>{
 
      // add all everything arcticles from Api to DB
@@ -117,18 +112,19 @@ class Api {
      }),
 
       // get all top-headline arcticles from Api
-     newsapi.getTopHeadlines(params).then((res)=>{
-      return res.articles.map((res)=>{
-        const top:INewArticleSource= res.source
-         res.publishedAt= new Date(res.publishedAt).toISOString()
-        this.compare(sourceDic[`${res.source.id}`],top)  
-        // res.publishedAt= `${ top.publishDate.getFullYear()}/${( top.publishDate.getMonth()+1)}/${ top.publishDate.getDate()}`
-
-        return res;
-     })
-   }).then((result)=>{
+      newsapi.getTopHeadlines(params).then((response)=>{
+        const allNeArticles :INewArticle[] = response.articles.map((art)=>{
+          return {
+            ...art,
+            publishedAt:moment(art.publishedAt).toDate(),
+            source:this.compare(sourceDic[`${art.source.id}`],art.source)
+          }
+        })        
+         return allNeArticles;
+   }).then((results)=>{
+     const t=0;
      // add all top-headline arcticles from Api to DB
-     topHeadlineHandler.upsertMany("url",result);
+     topHeadlineHandler.upsertMany("url",results);
      }).catch((err)=>{
      console.log(err);     
    })
