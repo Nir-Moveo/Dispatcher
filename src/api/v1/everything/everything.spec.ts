@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import EverythingModel from './everything.model';
 import { IQueryRequest } from '../../../framework/db/query-builder';
 
+
 const AppTest = new App(3000).app;
 const everythingModel = new EverythingModel();
 
@@ -170,6 +171,7 @@ describe('Everything api', () => {
     });
 
     test('get all articales from everything, test the filter country  ', async () => {
+
       const query : IQueryRequest= {
         filter:{
           "source.country" :["us"]
@@ -216,6 +218,7 @@ describe('Everything api', () => {
 
 
     test('get all articales from everything, test the sort filter ', async () => {
+
       const query : IQueryRequest= {
         skip: 0,
         limit: 10,
@@ -243,6 +246,7 @@ describe('Everything api', () => {
     });
 
     test('get all articales from everything, test the skip/limit filter ', async () => {
+
       const query : IQueryRequest= {
         skip: 2,
         limit: 2,
@@ -313,6 +317,7 @@ describe('Everything api', () => {
       .expect(200)
       .then((res)=>{
         const data = res.body;   
+
         
         expect(data.length).toBe(3);
         expect(data[0].name).toMatch("CNN");
@@ -328,6 +333,7 @@ describe('Everything api', () => {
       .expect(200)
       .then((res)=>{
         const data = res.body;           
+
         expect(data.length).toBe(1);
         expect(data[0]._id.week).toBe(44);
         expect(data[0].count).toBe(4);

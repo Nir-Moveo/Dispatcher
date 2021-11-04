@@ -12,6 +12,7 @@ export class topHeadlinesRouter extends BaseRoute<topHeadlinesController> {
         this.router.post('/getSources',(request: Request, response: Response, next: NextFunction) => this.controller.getDropdown(request,response,next,"name"));
         this.router.post('/getSourcesStatistics',(request: Request, response: Response, next: NextFunction) => this.controller.getSourceStatistics(request,response,next));
         this.router.post('/getDatesStatistics',(request: Request, response: Response, next: NextFunction) => this.controller.getDatesStatistics(request,response,next));
+
     }
 
     protected getController(): topHeadlinesController {
