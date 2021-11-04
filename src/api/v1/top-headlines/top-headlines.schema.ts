@@ -14,7 +14,7 @@ export interface ITopHeadlines extends ISchema {
     description:string,
     url:string,
     urlToImage:string,
-    publishedAt:string,
+    publishedAt:Date,
     content:string
 }
 
@@ -30,7 +30,7 @@ const StrongSchema = createStrongSchema<ITopHeadlines>(
           description:{type:String},
           url:{type:String},
           urlToImage:{type:String},
-          publishedAt:{type:String},
+          publishedAt:{type:Date},
           content:{type:String},
     },
     { timestamps: true }
@@ -40,4 +40,4 @@ StrongSchema.methods.toJSON = function () {
     return cleanObject(this.toObject());
 };
 
-export const TopHeadlinesSchema = mongoose.model<ITopHeadlines, AccessibleModel<ITopHeadlines>>('TopHeadlines', StrongSchema);
+export const topHeadlinesSchema = mongoose.model<ITopHeadlines, AccessibleModel<ITopHeadlines>>('TopHeadlines', StrongSchema);
